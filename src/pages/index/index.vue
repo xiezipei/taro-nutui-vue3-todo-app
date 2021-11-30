@@ -1,31 +1,54 @@
 <template>
-  <div class="app">
-    <div class="header">Todos</div>
-    <div>
-      <label>New ToDo</label>
-      <input v-model="newTodo" name="newTodo" />
-      <nut-input v-model="newTodo" :require-show="true" label="文本" />
-      <nut-button type="primary" @click="addTodo()">Add ToDo</nut-button>
+  <div class="todo-app">
+    <div class="todo-app-header">待办清单</div>
+    <div class="todo-app-form">
+      <label>新建待办</label>
+      <nut-textarea
+        placeholder="请输入待办内容"
+        v-model="newTodo"
+        class="textarea-add"
+        limit-show
+        max-length="20"
+        rows="1"
+        autosize
+      />
+      <nut-button type="info" shape="square" class="btn-add" block @click="addTodo()">添加待办</nut-button>
     </div>
-    <h2>ToDo List</h2>
-    <ul>
-      <li v-for="(todo, index) in todos" :key="index">
-        <span :class="{ done: todo.done }" @click="doneTodo(todo)">{{ todo.content }}</span>
-        <button @click="removeTodo(index)">Remove</button>
-      </li>
-    </ul>
-    <h4 v-if="todos.length === 0">Empty list.</h4>
+    <div class="todo-app-list">
+      <label>待办列表</label>
+      <div class="cell-wrap">
+        <nut-swipe v-for="(todo, index) in todos" :key="todo.content">
+          <nut-cell :title="todo.content" @click="doneTodo(todo)">
+            <template v-slot:icon>
+              <nut-icon v-if="todo.done" name="checklist" color="green"></nut-icon>
+            </template>
+          </nut-cell>
+          <template #right>
+            <nut-button
+              shape="square"
+              style="height:100%"
+              type="danger"
+              @click.stop="removeTodo(index)"
+            >删除</nut-button>
+          </template>
+        </nut-swipe>
+      </div>
+      <div class="list-empty" v-if="todos.length === 0">暂无数据</div>
+    </div>
   </div>
 </template>
 
 <script>
 import { ref } from 'vue';
 import Taro from '@tarojs/taro';
-import { Input } from '@nutui/nutui-taro';
+import { Cell, Input, Swipe, TextArea } from '@nutui/nutui-taro';
 export default {
   name: 'App',
   components: {
     'nut-input': Input,
+    'nut-textarea': TextArea,
+    'nut-cell': Cell,
+    'nut-swipe': Swipe
   },
   setup() {
     const newTodo = ref('');
@@ -38,11 +61,6 @@ export default {
 
     const obj = Taro.getStorageSync('todos');  // => {}
     console.log('todos', obj)
-
-
-    // const todosData = Object.keys(obj).length === 0 ? defaultData : obj;
-
-
     const todosData = obj || defaultData;
 
     const todos = ref(todosData);
@@ -63,7 +81,6 @@ export default {
       saveData();
     }
     function removeTodo(index) {
-      // Toast.text('删除成功');
       Taro.showToast({
         title: '删除成功',
         icon: 'success'
@@ -92,14 +109,60 @@ export default {
 </script>
 
 <style lang="scss">
-.app {
-  padding: 0 16px;
-  .header {
+$borderColor: #ccc;
+
+.todo-app {
+  padding-bottom: 32px;
+  box-sizing: border-box;
+  background-color: #f7f8fa;
+  height: 100vh;
+  width: 100vw;
+  overflow-y: auto;
+  overflow-x: hidden;
+  // 头部
+  &-header {
     font-size: 32px;
-    font-weight: bold;
+    width: 100%;
+    text-align: center;
   }
-  .done {
-    text-decoration: line-through;
+  // 表单
+  &-form {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 8px;
+    padding: 0 4px;
+    label {
+      padding: 0 16px;
+      font-size: 24px;
+    }
+    .textarea-add {
+      margin-top: 16px;
+      color: red;
+      font-family: -apple-system-font,Helvetica Neue,sans-serif;
+    }
+    .btn-add {
+      margin-top: 8px;
+      width: 100%;
+    }
+  }
+  // 列表
+  &-list {
+    margin-top: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    label {
+      font-size: 24px;
+      padding-left: 16px;
+    }
+    .cell-wrap {
+      width: 100%;
+    }
+    .list-empty {
+      color: #ccc;
+      font-size: 18px;
+      padding-left: 16px;
+      margin-top: 8px;
+    }
   }
 }
 </style>
