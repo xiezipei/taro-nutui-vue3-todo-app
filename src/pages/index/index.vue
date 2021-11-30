@@ -1,6 +1,8 @@
 <template>
   <div class="todo-app">
+    <!-- 头部 -->
     <div class="todo-app-header">待办清单</div>
+    <!-- 表单 -->
     <div class="todo-app-form">
       <label>新建待办</label>
       <nut-textarea
@@ -14,6 +16,7 @@
       />
       <nut-button type="info" shape="square" class="btn-add" block @click="addTodo()">添加待办</nut-button>
     </div>
+    <!-- 列表 -->
     <div class="todo-app-list">
       <label>待办列表</label>
       <div class="cell-wrap">
@@ -43,7 +46,7 @@ import { ref } from 'vue';
 import Taro from '@tarojs/taro';
 import { Cell, Input, Swipe, TextArea } from '@nutui/nutui-taro';
 export default {
-  name: 'App',
+  name: 'todo-app',
   components: {
     'nut-input': Input,
     'nut-textarea': TextArea,
@@ -53,20 +56,13 @@ export default {
   setup() {
     const newTodo = ref('');
     const defaultData = [
-      {
-        done: false,
-        content: 'Write a blog post'
-      }
+      { done: false, content: 'buy apple' },
+      { done: false, content: 'Learn Vue' },
+      { done: false, content: 'Build something awesome' },
     ]
-
-    const obj = Taro.getStorageSync('todos');  // => {}
-    console.log('todos', obj)
-    const todosData = obj || defaultData;
-
+    const todosData = Taro.getStorageSync('todos') || defaultData;
     const todos = ref(todosData);
-
     function addTodo() {
-      console.log(newTodo.value)
       if (newTodo.value) {
         todos.value.push({
           done: false,
@@ -89,12 +85,7 @@ export default {
       saveData();
     }
     function saveData() {
-      console.log('saveData()', todos.value)
-      try {
-        Taro.setStorageSync('todos', todos.value)
-      } catch (e) {
-        console.log(e)
-      }
+      Taro.setStorageSync('todos', todos.value)
     }
     return {
       todos,
@@ -109,8 +100,6 @@ export default {
 </script>
 
 <style lang="scss">
-$borderColor: #ccc;
-
 .todo-app {
   padding-bottom: 32px;
   box-sizing: border-box;
@@ -138,7 +127,7 @@ $borderColor: #ccc;
     .textarea-add {
       margin-top: 16px;
       color: red;
-      font-family: -apple-system-font,Helvetica Neue,sans-serif;
+      font-family: -apple-system-font, Helvetica Neue, sans-serif;
     }
     .btn-add {
       margin-top: 8px;
